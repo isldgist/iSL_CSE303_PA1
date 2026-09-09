@@ -1,7 +1,7 @@
 {
   "login": {
-    "loginTitle": "설문 참여자 정보",
-    "loginDescription": "학번, 이름, 비밀번호를 입력한 후 설문을 시작해 주세요.",
+    "loginTitle": "PA1 제출 로그인",
+    "loginDescription": "학번, 이름, 비밀번호를 입력한 후 제출을 시작해 주세요.",
     "studentIdLabel": "학번",
     "studentIdPlaceholder": "학번을 입력해 주세요.",
     "nameLabel": "이름",

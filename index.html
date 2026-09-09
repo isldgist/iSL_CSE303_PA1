@@ -1326,24 +1326,135 @@
             }
         }
 
+        const answerIntegrityStates = new WeakMap();
+        const recentClipboardSignals = new Map();
+
+        function getClipboardOperation(clipboardAction) {
+            if (clipboardAction === 'copy' || clipboardAction === 'shortcut-c') {
+                return 'copy';
+            }
+            if (clipboardAction === 'paste' || clipboardAction === 'shortcut-v' ||
+                clipboardAction === 'insertFromPaste') {
+                return 'paste';
+            }
+            if (clipboardAction === 'cut' || clipboardAction === 'shortcut-x' ||
+                clipboardAction === 'deleteByCut') {
+                return 'cut';
+            }
+            if (clipboardAction === 'drop' || clipboardAction === 'insertFromDrop') {
+                return 'drop';
+            }
+            return clipboardAction;
+        }
+
+        function flagAndRecordClipboardActivity(questionNumber, clipboardAction) {
+            const copyFlag = document.getElementById(`answer-copy-flag-${questionNumber}`);
+            if (copyFlag) {
+                copyFlag.value = 'true';
+            }
+
+            const now = Date.now();
+            const signalKey = `${questionNumber}:${getClipboardOperation(clipboardAction)}`;
+            const previousSignalAt = recentClipboardSignals.get(signalKey) || 0;
+            if (now - previousSignalAt < 750) {
+                return;
+            }
+            recentClipboardSignals.set(signalKey, now);
+            recordClipboardAttempt(questionNumber, clipboardAction);
+        }
+
+        function getAnswerDetails(target) {
+            if (!(target instanceof HTMLTextAreaElement) ||
+                !target.closest('.answer-box')) {
+                return null;
+            }
+            const match = target.id.match(/^written-answer-(\d+)$/);
+            if (!match) {
+                return null;
+            }
+            return {
+                textarea: target,
+                questionNumber: Number(match[1])
+            };
+        }
+
+        function syncAnswerIntegrityBaselines() {
+            document.querySelectorAll('.answer-box textarea').forEach(function (textarea) {
+                const state = answerIntegrityStates.get(textarea);
+                if (state) {
+                    state.value = textarea.value;
+                }
+            });
+        }
+        window.syncAnswerIntegrityBaselines = syncAnswerIntegrityBaselines;
+
+        document.addEventListener('keydown', function (event) {
+            const answerDetails = getAnswerDetails(event.target);
+            const key = String(event.key || '').toLowerCase();
+            if (answerDetails && (event.ctrlKey || event.metaKey) &&
+                ['c', 'v', 'x'].includes(key)) {
+                flagAndRecordClipboardActivity(
+                    answerDetails.questionNumber,
+                    `shortcut-${key}`
+                );
+            }
+        }, true);
+
+        ['copy', 'cut', 'paste', 'drop'].forEach(function (eventName) {
+            document.addEventListener(eventName, function (event) {
+                const answerDetails = getAnswerDetails(event.target);
+                if (answerDetails) {
+                    flagAndRecordClipboardActivity(answerDetails.questionNumber, eventName);
+                }
+            }, true);
+        });
+
+        ['beforeinput', 'input'].forEach(function (eventName) {
+            document.addEventListener(eventName, function (event) {
+                const answerDetails = getAnswerDetails(event.target);
+                if (!answerDetails) {
+                    return;
+                }
+
+                const clipboardInputTypes = [
+                    'insertFromPaste',
+                    'insertFromDrop',
+                    'deleteByCut'
+                ];
+                if (clipboardInputTypes.includes(event.inputType)) {
+                    flagAndRecordClipboardActivity(
+                        answerDetails.questionNumber,
+                        event.inputType
+                    );
+                } else if (!event.isTrusted) {
+                    flagAndRecordClipboardActivity(
+                        answerDetails.questionNumber,
+                        `untrusted-${eventName}`
+                    );
+                }
+
+                if (eventName === 'input') {
+                    const state = answerIntegrityStates.get(answerDetails.textarea);
+                    if (state) {
+                        state.value = answerDetails.textarea.value;
+                    }
+                }
+            }, true);
+        });
+
         document.querySelectorAll('.answer-box').forEach(function (answerBox, index) {
             const writtenAnswer = answerBox.querySelector('textarea');
             const characterCount = answerBox.querySelector('.character-count');
-            const copyFlag = document.getElementById(`answer-copy-flag-${index + 1}`);
+            answerIntegrityStates.set(writtenAnswer, { value: writtenAnswer.value });
 
             function blockClipboardAction(event, recordAttempt) {
                 event.preventDefault();
                 if (recordAttempt) {
-                    copyFlag.value = 'true';
                     const clipboardAction = event.type === 'keydown'
                         ? `shortcut-${event.key.toLowerCase()}`
                         : event.type;
-                    recordClipboardAttempt(index + 1, clipboardAction);
+                    flagAndRecordClipboardActivity(index + 1, clipboardAction);
                 }
-                const status = document.getElementById('submit-status');
-                status.textContent = activeQuestionConfig.clipboardBlockedMessage ||
-                    '답변 칸에서는 복사 및 붙여넣기를 사용할 수 없습니다.';
-                status.className = 'submit-status error';
             }
 
             writtenAnswer.addEventListener('input', function () {
@@ -1367,6 +1478,23 @@
                 }
             });
         });
+
+        function auditAnswerIntegrity() {
+            document.querySelectorAll('.answer-box textarea').forEach(function (textarea, index) {
+                const state = answerIntegrityStates.get(textarea);
+                if (!state || textarea.value === state.value) {
+                    return;
+                }
+                state.value = textarea.value;
+                flagAndRecordClipboardActivity(index + 1, 'unobserved-value-change');
+
+                const characterCount = textarea.parentElement.querySelector('.character-count');
+                const maxLength = textarea.maxLength > 0 ? textarea.maxLength : 1000;
+                characterCount.textContent = `${textarea.value.length} / ${maxLength}자`;
+            });
+        }
+        window.auditAnswerIntegrity = auditAnswerIntegrity;
+        setInterval(auditAnswerIntegrity, 500);
     </script>
     <script type="text/javascript" src="link_gform.js"></script>
 </body>

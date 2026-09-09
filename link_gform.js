@@ -63,6 +63,9 @@ function resetSurveyEditor() {
   surveyForm.querySelectorAll('textarea').forEach(function (textarea) {
     textarea.value = '';
   });
+  if (typeof window.syncAnswerIntegrityBaselines === 'function') {
+    window.syncAnswerIntegrityBaselines();
+  }
   updateCopyFlags([]);
   updateCharacterCounts();
   submitStatus.textContent = '';
@@ -77,6 +80,10 @@ window.resetSurveyResponseEditor = resetSurveyEditor;
 async function sendSurveyRequest(action) {
   if (pendingSurveyAction) {
     return;
+  }
+
+  if (action === 'submitSurvey' && typeof window.auditAnswerIntegrity === 'function') {
+    window.auditAnswerIntegrity();
   }
 
   let googleScriptUrl;
@@ -192,6 +199,9 @@ window.addEventListener('message', function (event) {
   surveyForm.querySelectorAll('.answer-box textarea').forEach(function (textarea, index) {
     textarea.value = answers[index] || '';
   });
+  if (typeof window.syncAnswerIntegrityBaselines === 'function') {
+    window.syncAnswerIntegrityBaselines();
+  }
   updateCharacterCounts();
   hasSubmittedVersion = true;
   resetSurveyButtons();

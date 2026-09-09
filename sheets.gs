@@ -143,11 +143,7 @@ function handleSurveySubmission_(e) {
           answerMaxLength + '자를 넘을 수 없습니다.'
         );
       }
-      const existingCopyDetected = existingResponse
-        ? readStoredAnswer_(existingResponse.row[index + 3]).copyDetected
-        : false;
-      const copyDetected = existingCopyDetected ||
-        clipboardLogFlags[index] ||
+      const copyDetected = clipboardLogFlags[index] ||
         String(e.parameter['answerCopy' + (index + 1)]) === 'true' ||
         clipboardCache.get(clipboardAuditKey_(authToken, index + 1)) === 'true';
       return safeCellValue_(copyDetected ? COPY_MARKER + answer : answer);
@@ -216,11 +212,14 @@ function handleClipboardAttempt_(e) {
     });
   }
 
-  CacheService.getScriptCache().put(
-    clipboardAuditKey_(authToken, questionNumber),
-    'true',
-    SESSION_TTL_SECONDS
-  );
+  const actualTransfer = isActualAnswerTransfer_(clipboardAction);
+  if (actualTransfer) {
+    CacheService.getScriptCache().put(
+      clipboardAuditKey_(authToken, questionNumber),
+      'true',
+      SESSION_TTL_SECONDS
+    );
+  }
 
   const spreadsheetId = PropertiesService.getScriptProperties()
     .getProperty('SPREADSHEET_ID');
@@ -249,7 +248,7 @@ function handleClipboardAttempt_(e) {
         safeCellValue_(session.studentId),
         safeCellValue_(session.respondentName),
         'Question ' + questionNumber,
-        COPY_MARKER + ' ' + clipboardAction
+        COPY_MARKER + ' ' + (actualTransfer ? 'actual ' : 'attempt ') + clipboardAction
       ]]);
     logRange
       .setFontColor('#303030')
@@ -320,15 +319,20 @@ function handleLoadLatestSurvey_(e) {
     const answers = loadedAnswers.map(function (entry) {
       return entry.answer;
     });
-    const copyFlags = loadedAnswers.map(function (entry, index) {
-      if (entry.copyDetected) {
+    const clipboardLogFlags = getClipboardLogFlags_(
+      spreadsheet,
+      session.studentId,
+      session.respondentName
+    );
+    const copyFlags = loadedAnswers.map(function (_, index) {
+      if (clipboardLogFlags[index]) {
         CacheService.getScriptCache().put(
           clipboardAuditKey_(authToken, index + 1),
           'true',
           SESSION_TTL_SECONDS
         );
       }
-      return entry.copyDetected;
+      return clipboardLogFlags[index];
     });
 
     return loginHtmlResponse_({
@@ -972,7 +976,17 @@ function readStoredAnswer_(value) {
 }
 
 function clipboardAuditKey_(authToken, questionNumber) {
-  return 'clipboard-attempt:' + authToken + ':' + questionNumber;
+  return 'clipboard-transfer:' + authToken + ':' + questionNumber;
+}
+
+function isActualAnswerTransfer_(clipboardAction) {
+  return [
+    'insertFromPaste',
+    'insertFromDrop',
+    'deleteByCut',
+    'untrusted-input',
+    'unobserved-value-change'
+  ].indexOf(clipboardAction) !== -1;
 }
 
 function getClipboardLogFlags_(spreadsheet, studentId, respondentName) {
@@ -998,9 +1012,13 @@ function getClipboardLogFlags_(spreadsheet, studentId, respondentName) {
     }
     const questionMatch = /^Question (\d+)$/.exec(row[3].trim());
     const questionNumber = questionMatch ? Number(questionMatch[1]) : 0;
+    const logText = row[4].trim();
+    const loggedAction = logText.indexOf(COPY_MARKER + ' actual ') === 0
+      ? logText.slice((COPY_MARKER + ' actual ').length)
+      : '';
     if (questionNumber >= 1 &&
         questionNumber <= flags.length &&
-        row[4].indexOf(COPY_MARKER) === 0) {
+        isActualAnswerTransfer_(loggedAction)) {
       flags[questionNumber - 1] = true;
     }
   });

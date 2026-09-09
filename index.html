@@ -1334,32 +1334,49 @@
                 return 'copy';
             }
             if (clipboardAction === 'paste' || clipboardAction === 'shortcut-v' ||
-                clipboardAction === 'insertFromPaste') {
+                clipboardAction.includes('insertFromPaste')) {
                 return 'paste';
             }
             if (clipboardAction === 'cut' || clipboardAction === 'shortcut-x' ||
-                clipboardAction === 'deleteByCut') {
+                clipboardAction.includes('deleteByCut')) {
                 return 'cut';
             }
-            if (clipboardAction === 'drop' || clipboardAction === 'insertFromDrop') {
+            if (clipboardAction === 'drop' || clipboardAction.includes('insertFromDrop')) {
                 return 'drop';
             }
             return clipboardAction;
         }
 
+        function isActualAnswerTransfer(clipboardAction) {
+            return [
+                'insertFromPaste',
+                'insertFromDrop',
+                'deleteByCut',
+                'untrusted-input',
+                'unobserved-value-change'
+            ].includes(clipboardAction);
+        }
+
         function flagAndRecordClipboardActivity(questionNumber, clipboardAction) {
-            const copyFlag = document.getElementById(`answer-copy-flag-${questionNumber}`);
-            if (copyFlag) {
-                copyFlag.value = 'true';
+            const actualTransfer = isActualAnswerTransfer(clipboardAction);
+            if (actualTransfer) {
+                const copyFlag = document.getElementById(`answer-copy-flag-${questionNumber}`);
+                if (copyFlag) {
+                    copyFlag.value = 'true';
+                }
             }
 
             const now = Date.now();
             const signalKey = `${questionNumber}:${getClipboardOperation(clipboardAction)}`;
-            const previousSignalAt = recentClipboardSignals.get(signalKey) || 0;
-            if (now - previousSignalAt < 750) {
+            const previousSignal = recentClipboardSignals.get(signalKey);
+            const isRecent = previousSignal && now - previousSignal.recordedAt < 750;
+            if (isRecent && (!actualTransfer || previousSignal.actualTransfer)) {
                 return;
             }
-            recentClipboardSignals.set(signalKey, now);
+            recentClipboardSignals.set(signalKey, {
+                recordedAt: now,
+                actualTransfer: actualTransfer || Boolean(previousSignal?.actualTransfer)
+            });
             recordClipboardAttempt(questionNumber, clipboardAction);
         }
 
@@ -1424,7 +1441,9 @@
                 if (clipboardInputTypes.includes(event.inputType)) {
                     flagAndRecordClipboardActivity(
                         answerDetails.questionNumber,
-                        event.inputType
+                        eventName === 'input'
+                            ? event.inputType
+                            : `before-${event.inputType}`
                     );
                 } else if (!event.isTrusted) {
                     flagAndRecordClipboardActivity(

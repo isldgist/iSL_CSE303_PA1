@@ -1,4 +1,6 @@
 {
+  "schemaVersion": 1,
+  "assignmentId": "PA1",
   "login": {
     "loginTitle": "PA1 제출 로그인",
     "loginDescription": "학번, 이름, 비밀번호를 입력한 후 제출을 시작해 주세요.",
@@ -32,7 +34,7 @@
   },
   "form": {
     "googleScriptUrl": "https://script.google.com/macros/s/AKfycbwXPTAtx3TeughQK8SFyOEdYHTtm5Jpt2MrSChBcg9D1zBYFJTBkwdEouOhlVsiNO5T0A/exec",
-    "surveyTitle": "딥러닝개론 Project Assignment 1",
+    "surveyTitle": "PA1: CIFAR-10 CNN feature 분석",
     "loadLatestButtonText": "제출본 불러오기",
     "newResponseMessage": "새 답변을 작성 중입니다.",
     "loadingLatestMessage": "제출본을 불러오고 있습니다.",
@@ -47,24 +49,25 @@
     "answerPlaceholder": "답변을 입력해 주세요.",
     "clipboardBlockedMessage": "답변 칸에서는 복사 및 붙여넣기를 사용할 수 없습니다.",
     "question1": {
-      "text": "첫 번째 질문을 입력하세요.",
-      "maxLength": 1000
+      "id": "Q1",
+      "title": "깊이, 채널, pooling",
+      "points": 20,
+      "text": "fig1.png에서 conv02, conv07, conv12의 feature map이 깊이에 따라 어떻게 달라지는지 비교하라. 각 층의 spatial 크기와 pooling 위치를 함께 설명하고, fig2.png에서 같은 conv07 안의 채널들이 서로 다르게 반응하는 구체적인 예를 두 개 이상 들라. q1.json의 실제 통계값을 근거로 쓰고, 그림만으로 판단하기 어려운 점도 적으라.",
+      "maxLength": 1800
     },
     "question2": {
-      "text": "두 번째 질문을 입력하세요.",
-      "maxLength": 1000
+      "id": "Q2",
+      "title": "학습 전후와 좌우반전",
+      "points": 15,
+      "text": "fig3.png에서 초기 모델과 학습된 모델의 conv02, conv07, conv12 표현을 비교하라. 이어서 fig4.png와 q2.json으로 좌우반전 전후의 layer별 GAP cosine similarity와 최종 예측 일치율을 설명하라. 두 지표가 같은 결론을 주는지 확인하고, 이 분석만으로 모델이 좌우반전에 강하다고 단정할 수 없는 이유를 적으라.",
+      "maxLength": 1800
     },
     "question3": {
-      "text": "세 번째 질문을 입력하세요.",
-      "maxLength": 1000
-    },
-    "question4": {
-      "text": "네 번째 질문을 입력하세요.",
-      "maxLength": 1000
-    },
-    "question5": {
-      "text": "다섯 번째 질문을 입력하세요.",
-      "maxLength": 1000
+      "id": "Q3",
+      "title": "정분류와 오분류",
+      "points": 15,
+      "text": "fig5.png와 fig6.png의 정분류·오분류 사례를 비교하라. q3.json의 정답, 예측, confidence를 인용해 반복해서 나타나는 시각적 조건이나 혼동 관계를 설명하라. 관찰한 사실과 원인 가설을 구분하고, 가설을 확인할 추가 실험 한 가지를 구체적으로 제안하라.",
+      "maxLength": 1800
     }
   }
 }

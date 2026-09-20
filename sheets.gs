@@ -9,16 +9,12 @@ const HEADERS = [
   'Timestamp',
   'Answer 1',
   'Answer 2',
-  'Answer 3',
-  'Answer 4',
-  'Answer 5'
+  'Answer 3'
 ];
 const ANSWER_KEYS = [
   'writtenAnswer1',
   'writtenAnswer2',
-  'writtenAnswer3',
-  'writtenAnswer4',
-  'writtenAnswer5'
+  'writtenAnswer3'
 ];
 const USERS_SHEET_NAME = 'Users';
 const USER_HEADERS = ['학번', '이름', '비밀번호', '활성화', '초기화 여부'];

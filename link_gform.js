@@ -38,12 +38,11 @@ function updateCharacterCounts() {
 }
 
 function updateCopyFlags(copyFlags) {
-  for (let index = 0; index < 5; index++) {
-    const flagInput = document.getElementById(`answer-copy-flag-${index + 1}`);
+  surveyForm.querySelectorAll('[id^="answer-copy-flag-"]').forEach(function (flagInput, index) {
     flagInput.value = Array.isArray(copyFlags) && copyFlags[index]
       ? 'true'
       : 'false';
-  }
+  });
 }
 
 function resetSurveyButtons() {

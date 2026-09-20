@@ -665,17 +665,13 @@
             <input type="hidden" id="form-respondent-name" name="respondentName">
             <input type="hidden" id="survey-action" name="action" value="submitSurvey">
             <input type="hidden" id="auth-token" name="authToken">
-            <input type="hidden" id="answer-max-length" name="answerMaxLength" value="1000">
-            <input type="hidden" id="answer-max-length-1" name="answerMaxLength1" value="1000">
-            <input type="hidden" id="answer-max-length-2" name="answerMaxLength2" value="1000">
-            <input type="hidden" id="answer-max-length-3" name="answerMaxLength3" value="1000">
-            <input type="hidden" id="answer-max-length-4" name="answerMaxLength4" value="1000">
-            <input type="hidden" id="answer-max-length-5" name="answerMaxLength5" value="1000">
+            <input type="hidden" id="answer-max-length" name="answerMaxLength" value="1800">
+            <input type="hidden" id="answer-max-length-1" name="answerMaxLength1" value="1800">
+            <input type="hidden" id="answer-max-length-2" name="answerMaxLength2" value="1800">
+            <input type="hidden" id="answer-max-length-3" name="answerMaxLength3" value="1800">
             <input type="hidden" id="answer-copy-flag-1" name="answerCopy1" value="false">
             <input type="hidden" id="answer-copy-flag-2" name="answerCopy2" value="false">
             <input type="hidden" id="answer-copy-flag-3" name="answerCopy3" value="false">
-            <input type="hidden" id="answer-copy-flag-4" name="answerCopy4" value="false">
-            <input type="hidden" id="answer-copy-flag-5" name="answerCopy5" value="false">
 
             <div class="respondent-summary">
                 <span id="respondent-summary-text">
@@ -811,8 +807,8 @@
                 <div class="rowTab long-answer">
                     <label for="written-answer-1">Question 1:<span class="question-text" data-question-index="0">질문 불러오는 중...</span></label>
                     <div class="answer-box">
-                        <textarea id="written-answer-1" name="writtenAnswer1" placeholder="답변을 입력해 주세요." maxlength="1000"></textarea>
-                        <span class="character-count" aria-live="polite">0 / 1000자</span>
+                        <textarea id="written-answer-1" name="writtenAnswer1" placeholder="답변을 입력해 주세요." maxlength="1800"></textarea>
+                        <span class="character-count" aria-live="polite">0 / 1800자</span>
                     </div>
                 </div>
             </div>
@@ -820,8 +816,8 @@
                 <div class="rowTab long-answer">
                     <label for="written-answer-2">Question 2:<span class="question-text" data-question-index="1">질문 불러오는 중...</span></label>
                     <div class="answer-box">
-                        <textarea id="written-answer-2" name="writtenAnswer2" placeholder="답변을 입력해 주세요." maxlength="1000"></textarea>
-                        <span class="character-count" aria-live="polite">0 / 1000자</span>
+                        <textarea id="written-answer-2" name="writtenAnswer2" placeholder="답변을 입력해 주세요." maxlength="1800"></textarea>
+                        <span class="character-count" aria-live="polite">0 / 1800자</span>
                     </div>
                 </div>
             </div>
@@ -829,26 +825,8 @@
                 <div class="rowTab long-answer">
                     <label for="written-answer-3">Question 3:<span class="question-text" data-question-index="2">질문 불러오는 중...</span></label>
                     <div class="answer-box">
-                        <textarea id="written-answer-3" name="writtenAnswer3" placeholder="답변을 입력해 주세요." maxlength="1000"></textarea>
-                        <span class="character-count" aria-live="polite">0 / 1000자</span>
-                    </div>
-                </div>
-            </div>
-            <div class="box-inner">
-                <div class="rowTab long-answer">
-                    <label for="written-answer-4">Question 4:<span class="question-text" data-question-index="3">질문 불러오는 중...</span></label>
-                    <div class="answer-box">
-                        <textarea id="written-answer-4" name="writtenAnswer4" placeholder="답변을 입력해 주세요." maxlength="1000"></textarea>
-                        <span class="character-count" aria-live="polite">0 / 1000자</span>
-                    </div>
-                </div>
-            </div>
-            <div class="box-inner">
-                <div class="rowTab long-answer">
-                    <label for="written-answer-5">Question 5:<span class="question-text" data-question-index="4">질문 불러오는 중...</span></label>
-                    <div class="answer-box">
-                        <textarea id="written-answer-5" name="writtenAnswer5" placeholder="답변을 입력해 주세요." maxlength="1000"></textarea>
-                        <span class="character-count" aria-live="polite">0 / 1000자</span>
+                        <textarea id="written-answer-3" name="writtenAnswer3" placeholder="답변을 입력해 주세요." maxlength="1800"></textarea>
+                        <span class="character-count" aria-live="polite">0 / 1800자</span>
                     </div>
                 </div>
             </div>
@@ -961,9 +939,18 @@
                     const index = Number(element.dataset.questionIndex);
                     const questionKey = `question${index + 1}`;
                     const questionSettings = questionConfig[questionKey];
-                    element.textContent = typeof questionSettings === 'string'
-                        ? questionSettings
-                        : (questionSettings?.text || '질문을 입력해 주세요.');
+                    if (typeof questionSettings === 'string') {
+                        element.textContent = questionSettings;
+                        return;
+                    }
+                    const questionTitle = questionSettings?.title || '';
+                    const questionPoints = Number(questionSettings?.points) > 0
+                        ? ` (${Number(questionSettings.points)}점)`
+                        : '';
+                    const questionPrompt = questionSettings?.text || '질문을 입력해 주세요.';
+                    element.textContent = questionTitle
+                        ? `${questionTitle}${questionPoints} — ${questionPrompt}`
+                        : questionPrompt;
                 });
             } catch (error) {
                 questionElements.forEach(function (element) {
@@ -1488,7 +1475,7 @@
         window.auditAnswerIntegrity = auditAnswerIntegrity;
         setInterval(auditAnswerIntegrity, 500);
     </script>
-    <script type="text/javascript" src="link_gform.js"></script>
+    <script type="text/javascript" src="link_gform.js?v=pa1-3q"></script>
 </body>
 
 </html>

@@ -981,7 +981,9 @@ function isActualAnswerTransfer_(clipboardAction) {
     'insertFromDrop',
     'deleteByCut',
     'untrusted-input',
-    'unobserved-value-change'
+    'unobserved-value-change',
+    'textarea-replaced',
+    'integrity-hook-tampered'
   ].indexOf(clipboardAction) !== -1;
 }
 

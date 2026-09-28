@@ -859,14 +859,11 @@
                     </div>
                 </div>
             </div>
-<<<<<<< HEAD
-=======
-
->>>>>>> 5e630e411db6f179bd6e62d422efbeb2ad3cb1c3
         <button id="submit" type="submit">Submit</button>
         <p id="submit-status" class="submit-status" role="status" aria-live="polite"></p>
         </form>
         <iframe id="survey-response-frame" name="survey-response-frame" title="설문 응답 처리" hidden></iframe>
+        <iframe id="clipboard-audit-frame" name="clipboard-audit-frame" title="복사 및 붙여넣기 시도 기록" hidden></iframe>
     </div>
     
     <script>
@@ -972,7 +969,6 @@
                 questionElements.forEach(function (element) {
                     const index = Number(element.dataset.questionIndex);
                     const questionKey = `question${index + 1}`;
-<<<<<<< HEAD
                     const questionSettings = questions[index] || questionConfig[questionKey];
                     element.textContent = typeof questionSettings === 'string'
                         ? questionSettings
@@ -988,21 +984,6 @@
                         points.textContent = `(${Number(question.points)} points)`;
                         element.appendChild(points);
                     }
-=======
-                    const questionSettings = questionConfig[questionKey];
-                    if (typeof questionSettings === 'string') {
-                        element.textContent = questionSettings;
-                        return;
-                    }
-                    const questionTitle = questionSettings?.title || '';
-                    const questionPoints = Number(questionSettings?.points) > 0
-                        ? ` (${Number(questionSettings.points)}점)`
-                        : '';
-                    const questionPrompt = questionSettings?.text || '질문을 입력해 주세요.';
-                    element.textContent = questionTitle
-                        ? `${questionTitle}${questionPoints} — ${questionPrompt}`
-                        : questionPrompt;
->>>>>>> 5e630e411db6f179bd6e62d422efbeb2ad3cb1c3
                 });
             } catch (error) {
                 questionElements.forEach(function (element) {

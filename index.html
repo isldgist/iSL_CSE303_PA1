@@ -141,12 +141,32 @@
         .long-answer label {
             display: block;
             margin-bottom: 8px;
+        }
+
+        .question-title {
+            margin: 0 0 8px;
+            font-size: 18px;
             font-weight: bold;
         }
 
-        .question-text {
+        .question-points {
             margin-left: 8px;
+            color: #666;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .question-text {
+            display: block;
+            margin: 0 0 12px;
             font-weight: normal;
+            line-height: 1.6;
+        }
+
+        .question-content {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
         }
 
         .respondent-info {
@@ -803,34 +823,46 @@
                     </div>
                 </div>
             </div>
-            <div class="box-inner">
+            <div class="box-inner question-card" data-question-card-index="0">
                 <div class="rowTab long-answer">
-                    <label for="written-answer-1">Question 1:<span class="question-text" data-question-index="0">질문 불러오는 중...</span></label>
+                    <div class="question-content" draggable="false">
+                        <h2 class="question-title" data-question-title-index="0">질문 불러오는 중...</h2>
+                        <label class="question-text" for="written-answer-1" data-question-index="0">질문 불러오는 중...</label>
+                    </div>
                     <div class="answer-box">
                         <textarea id="written-answer-1" name="writtenAnswer1" placeholder="답변을 입력해 주세요." maxlength="1800"></textarea>
                         <span class="character-count" aria-live="polite">0 / 1800자</span>
                     </div>
                 </div>
             </div>
-            <div class="box-inner">
+            <div class="box-inner question-card" data-question-card-index="1">
                 <div class="rowTab long-answer">
-                    <label for="written-answer-2">Question 2:<span class="question-text" data-question-index="1">질문 불러오는 중...</span></label>
+                    <div class="question-content" draggable="false">
+                        <h2 class="question-title" data-question-title-index="1">질문 불러오는 중...</h2>
+                        <label class="question-text" for="written-answer-2" data-question-index="1">질문 불러오는 중...</label>
+                    </div>
                     <div class="answer-box">
                         <textarea id="written-answer-2" name="writtenAnswer2" placeholder="답변을 입력해 주세요." maxlength="1800"></textarea>
                         <span class="character-count" aria-live="polite">0 / 1800자</span>
                     </div>
                 </div>
             </div>
-            <div class="box-inner">
+            <div class="box-inner question-card" data-question-card-index="2">
                 <div class="rowTab long-answer">
-                    <label for="written-answer-3">Question 3:<span class="question-text" data-question-index="2">질문 불러오는 중...</span></label>
+                    <div class="question-content" draggable="false">
+                        <h2 class="question-title" data-question-title-index="2">질문 불러오는 중...</h2>
+                        <label class="question-text" for="written-answer-3" data-question-index="2">질문 불러오는 중...</label>
+                    </div>
                     <div class="answer-box">
                         <textarea id="written-answer-3" name="writtenAnswer3" placeholder="답변을 입력해 주세요." maxlength="1800"></textarea>
                         <span class="character-count" aria-live="polite">0 / 1800자</span>
                     </div>
                 </div>
             </div>
+<<<<<<< HEAD
+=======
 
+>>>>>>> 5e630e411db6f179bd6e62d422efbeb2ad3cb1c3
         <button id="submit" type="submit">Submit</button>
         <p id="submit-status" class="submit-status" role="status" aria-live="polite"></p>
         </form>
@@ -847,12 +879,14 @@
 
         async function loadQuestions() {
             const questionElements = document.querySelectorAll('[data-question-index]');
+            const questionTitleElements = document.querySelectorAll('[data-question-title-index]');
 
             try {
                 const data = await window.surveyConfigPromise;
                 const loginConfig = data.login || {};
                 const formConfig = data.form || {};
                 const questionConfig = data.question || {};
+                const questions = Array.isArray(data.questions) ? data.questions : [];
 
                 const textSettings = {
                     'login-title': loginConfig.loginTitle,
@@ -869,7 +903,7 @@
                     'change-password-toggle': loginConfig.changePasswordButtonText,
                     'password-change-submit': loginConfig.changePasswordSubmitText,
                     'cancel-password-change': loginConfig.cancelButtonText,
-                    'title': formConfig.surveyTitle,
+                    'title': data.title || formConfig.surveyTitle,
                     'description': formConfig.surveyDescription,
                     'load-latest-response': formConfig.loadLatestButtonText,
                     'loaded-version-info': formConfig.newResponseMessage,
@@ -909,9 +943,10 @@
                 let largestAnswerMaxLength = 1;
                 document.querySelectorAll('.answer-box textarea').forEach(function (textarea, index) {
                     const questionKey = `question${index + 1}`;
-                    const questionSettings = questionConfig[questionKey] || {};
-                    const answerMaxLength = Number(questionSettings.maxLength) > 0
-                        ? Math.floor(Number(questionSettings.maxLength))
+                    const questionSettings = questions[index] || questionConfig[questionKey] || {};
+                    const configuredMaxLength = questionSettings.maxCharacters ?? questionSettings.maxLength;
+                    const answerMaxLength = Number(configuredMaxLength) > 0
+                        ? Math.floor(Number(configuredMaxLength))
                         : 1000;
                     if (questionConfig.answerPlaceholder) {
                         textarea.placeholder = questionConfig.answerPlaceholder;
@@ -937,6 +972,23 @@
                 questionElements.forEach(function (element) {
                     const index = Number(element.dataset.questionIndex);
                     const questionKey = `question${index + 1}`;
+<<<<<<< HEAD
+                    const questionSettings = questions[index] || questionConfig[questionKey];
+                    element.textContent = typeof questionSettings === 'string'
+                        ? questionSettings
+                        : (questionSettings?.prompt || questionSettings?.text || '질문을 입력해 주세요.');
+                });
+                questionTitleElements.forEach(function (element) {
+                    const index = Number(element.dataset.questionTitleIndex);
+                    const question = questions[index];
+                    element.textContent = question?.title || `Question ${index + 1}`;
+                    if (Number.isFinite(Number(question?.points))) {
+                        const points = document.createElement('span');
+                        points.className = 'question-points';
+                        points.textContent = `(${Number(question.points)} points)`;
+                        element.appendChild(points);
+                    }
+=======
                     const questionSettings = questionConfig[questionKey];
                     if (typeof questionSettings === 'string') {
                         element.textContent = questionSettings;
@@ -950,6 +1002,7 @@
                     element.textContent = questionTitle
                         ? `${questionTitle}${questionPoints} — ${questionPrompt}`
                         : questionPrompt;
+>>>>>>> 5e630e411db6f179bd6e62d422efbeb2ad3cb1c3
                 });
             } catch (error) {
                 questionElements.forEach(function (element) {
@@ -960,6 +1013,12 @@
         }
 
         loadQuestions();
+
+        document.addEventListener('dragstart', function (event) {
+            if (event.target.closest('.question-content')) {
+                event.preventDefault();
+            }
+        });
 
         const loginScreen = document.getElementById('login-screen');
         const surveyScreen = document.getElementById('form-outer');

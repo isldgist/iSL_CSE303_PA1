@@ -41,8 +41,8 @@ function setup() {
     sheet = spreadsheet.insertSheet(SHEET_NAME);
   }
 
-  // 이전 9개 열 헤더(이메일 포함)가 남지 않도록 제목 행만 초기화합니다.
-  sheet.getRange(HEADER_ROW, START_COLUMN, 1, 9).clearContent();
+  // 이전 5문항 형식의 헤더가 남지 않도록 기존 범위의 제목 행을 초기화합니다.
+  sheet.getRange(HEADER_ROW, START_COLUMN, 1, 8).clearContent();
   sheet
     .getRange(HEADER_ROW, START_COLUMN, 1, HEADERS.length)
     .setValues([HEADERS]);

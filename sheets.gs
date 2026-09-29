@@ -289,9 +289,8 @@ function handleLoadLatestSurvey_(e) {
       throw new Error('Apps Script 편집기에서 setup 함수를 먼저 실행해 주세요.');
     }
 
-    const sheet = SpreadsheetApp
-      .openById(spreadsheetId)
-      .getSheetByName(SHEET_NAME);
+    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    const sheet = spreadsheet.getSheetByName(SHEET_NAME);
     if (!sheet) {
       throw new Error('Responses 시트를 찾을 수 없습니다.');
     }

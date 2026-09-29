@@ -37,15 +37,15 @@
         
         #title {
             margin: 30px 0 16px;
-            padding: 26px 20px;
-            border: 2px solid var(--card-border);
-            border-radius: 24px;
-            background: var(--card-bg);
+            padding: 10px 0;
+            border: none;
+            border-radius: 0;
+            background: transparent;
             color: var(--text-main);
             font-family: Georgia, "Times New Roman", serif;
             font-size: clamp(34px, 3vw, 48px);
-            box-shadow: 0 20px 45px rgba(50, 50, 50, 0.18);
-            backdrop-filter: blur(12px);
+            box-shadow: none;
+            backdrop-filter: none;
         }
 
         #description {
@@ -498,7 +498,7 @@
 
         .answer-box textarea {
             width: 100%;
-            min-height: 360px;
+            min-height: 720px;
             padding: 12px 12px 30px;
             box-sizing: border-box;
             border: 1px solid rgba(100, 100, 100, 0.55);
@@ -977,7 +977,9 @@
                 questionTitleElements.forEach(function (element) {
                     const index = Number(element.dataset.questionTitleIndex);
                     const question = questions[index];
-                    element.textContent = question?.title || `Question ${index + 1}`;
+                    const questionId = question?.id || `Q${index + 1}`;
+                    const questionTitle = question?.title || `Question ${index + 1}`;
+                    element.textContent = `${questionId}. ${questionTitle}`;
                     if (Number.isFinite(Number(question?.points))) {
                         const points = document.createElement('span');
                         points.className = 'question-points';

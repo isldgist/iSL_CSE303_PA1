@@ -8,7 +8,7 @@
       "title": "Feature maps, channels, and pooling",
       "points": 20,
       "maxCharacters": 1800,
-      "prompt": "`fig1.png`에서 conv02→conv07→conv12로 갈수록 feature map의 공간 크기와 활성 패턴이 어떻게 변하는지 Pooling 위치와 연결해 설명하라. `fig2.png`의 conv07 channel 두 개가 서로 다른 영역에 반응하는 모습도 비교하라. (`q1.json` 수치를 근거로)",
+      "prompt": "fig1.png에서 conv02→conv07→conv12로 갈수록 feature map의 공간 크기와 활성 패턴이 어떻게 변하는지 pooling 위치와 연결해 설명하라. q1.json의 shape와 층별 통계를 근거로 사용하라. 또한 fig2.png에서 conv07의 두 채널을 선택하여 채널 번호를 명시하고, 서로 다른 영역에 반응하는 모습을 비교하라.",
       "evidence": ["fig1.png", "fig2.png", "q1.json"]
     },
     {
@@ -16,7 +16,7 @@
       "title": "BatchNorm running statistics and parameters",
       "points": 15,
       "maxCharacters": 1800,
-      "prompt": "`fig3.png`에서 BatchNorm running statistics와 clean val 입력 통계는 어느 층에서 가장 다르며, 이 차이는 무엇을 뜻하는지 서술하라. `fig4.png`에서 표준정규분포를 가정한 gamma·beta의 zero-fraction 예측과 val 통계로 보정한 예측을 실제 값과 비교하라. `q2.json` 수치를 들어 BatchNorm과 ReLU의 관계를 설명하라.",
+      "prompt": "fig3.png와 q2.json에서 100개 clean validation 분석 샘플의 통계와 BatchNorm running statistics가 가장 다른 층을 mean_shift와 |log_var_ratio| 기준으로 각각 찾고, 차이의 의미를 설명하라. fig4.png에서 표준정규 가정에 따른 zero-fraction 예측과 측정 통계로 보정한 예측을 실제 값과 비교하라. q2.json의 수치를 근거로 gamma·beta와 ReLU의 zero fraction 사이의 관계를 설명하라.",
       "evidence": ["fig3.png", "fig4.png", "q2.json"]
     },
     {
@@ -24,7 +24,7 @@
       "title": "Confusion matrix and occlusion",
       "points": 15,
       "maxCharacters": 1800,
-      "prompt": "`fig5.png`에서 자주 혼동되는 class pair를 찾아 `q3.json`의 count·rate로 설명하라. `fig6.png`의 오분류 사례 한 개에서 occlusion 위치에 따라 predicted class와 true class의 log-odds가 어떻게 변하는지 서술하고 이를 바탕으로 모델이 object와 surroundings 중 어떤 단서를 사용하는지 설명하라.",
+      "prompt": "fig5.png에서 자주 발생하는 혼동을 실제 클래스→예측 클래스 방향으로 명시하고, q3.json의 count·rate를 근거로 설명하라. fig6.png의 오분류 사례 하나를 선택하여, 가리는 위치에 따라 predicted class와 true class의 log-odds가 어떻게 변하는지 설명하라. 이를 근거로 모델이 object와 surroundings 중 어떤 단서를 사용하는지 추정하고, 이 해석의 한계를 짧게 서술하라.",
       "evidence": ["fig5.png", "fig6.png", "q3.json"]
     }
   ],

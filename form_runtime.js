@@ -144,20 +144,42 @@ function exposeGuardedIntegrityFunction(name, callback) {
     });
 }
 
-['copy', 'cut', 'paste', 'drop', 'dragstart', 'contextmenu'].forEach(function (eventName) {
+const blockedTransferActions = {
+    paste: 'insertFromPaste'
+};
+
+['cut', 'paste', 'drop', 'dragstart'].forEach(function (eventName) {
     document.addEventListener(eventName, function (event) {
-        if (getAnswerDetails(event.target)) {
-            event.preventDefault();
+        const answerDetails = getAnswerDetails(event.target);
+        if (!answerDetails) {
+            return;
         }
+        const clipboardAction = blockedTransferActions[eventName];
+        if (clipboardAction) {
+            flagAndRecordClipboardActivityInternal(
+                answerDetails.questionNumber,
+                clipboardAction
+            );
+        }
+        event.preventDefault();
     }, true);
 });
 document.addEventListener('keydown', function (event) {
     const answerDetails = getAnswerDetails(event.target);
-    const clipboardShortcut = (event.ctrlKey || event.metaKey) &&
-        ['c', 'v', 'x'].includes(event.key.toLowerCase());
-    if (answerDetails && clipboardShortcut) {
-        event.preventDefault();
+    if (!answerDetails || !(event.ctrlKey || event.metaKey)) {
+        return;
     }
+    const shortcutKey = event.key.toLowerCase();
+    if (!['v', 'x'].includes(shortcutKey)) {
+        return;
+    }
+    if (shortcutKey === 'v') {
+        flagAndRecordClipboardActivityInternal(
+            answerDetails.questionNumber,
+            'insertFromPaste'
+        );
+    }
+    event.preventDefault();
 }, true);
 
 const syncAnswerIntegrityBaselines = function () {
@@ -220,14 +242,14 @@ document.querySelectorAll('.answer-box').forEach(function (answerBox, index) {
         characterCount.textContent =
             `${writtenAnswer.value.length} / ${maxLength}자`;
     });
-    ['copy', 'cut', 'paste', 'drop', 'dragstart', 'contextmenu'].forEach(function (eventName) {
+    ['cut', 'paste', 'drop', 'dragstart'].forEach(function (eventName) {
         writtenAnswer.addEventListener(eventName, function (event) {
             blockClipboardAction(event);
         });
     });
     writtenAnswer.addEventListener('keydown', function (event) {
         const clipboardShortcut = (event.ctrlKey || event.metaKey) &&
-            ['c', 'v', 'x'].includes(event.key.toLowerCase());
+            ['v', 'x'].includes(event.key.toLowerCase());
         if (clipboardShortcut) {
             blockClipboardAction(event);
         }

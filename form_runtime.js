@@ -144,22 +144,11 @@ function exposeGuardedIntegrityFunction(name, callback) {
     });
 }
 
-const blockedTransferActions = {
-    paste: 'insertFromPaste'
-};
-
 ['cut', 'paste', 'drop', 'dragstart'].forEach(function (eventName) {
     document.addEventListener(eventName, function (event) {
         const answerDetails = getAnswerDetails(event.target);
         if (!answerDetails) {
             return;
-        }
-        const clipboardAction = blockedTransferActions[eventName];
-        if (clipboardAction) {
-            flagAndRecordClipboardActivityInternal(
-                answerDetails.questionNumber,
-                clipboardAction
-            );
         }
         event.preventDefault();
     }, true);
@@ -173,12 +162,6 @@ document.addEventListener('keydown', function (event) {
     if (!['v', 'x'].includes(shortcutKey)) {
         return;
     }
-    if (shortcutKey === 'v') {
-        flagAndRecordClipboardActivityInternal(
-            answerDetails.questionNumber,
-            'insertFromPaste'
-        );
-    }
     event.preventDefault();
 }, true);
 
@@ -191,40 +174,39 @@ const syncAnswerIntegrityBaselines = function () {
     });
 };
 
-['beforeinput', 'input'].forEach(function (eventName) {
-    document.addEventListener(eventName, function (event) {
-        const answerDetails = getAnswerDetails(event.target);
-        if (!answerDetails) {
-            return;
-        }
+document.addEventListener('input', function (event) {
+    const answerDetails = getAnswerDetails(event.target);
+    if (!answerDetails) {
+        return;
+    }
 
-        const clipboardInputTypes = [
-            'insertFromPaste',
-            'insertFromDrop',
-            'deleteByCut'
-        ];
-        if (clipboardInputTypes.includes(event.inputType)) {
-            flagAndRecordClipboardActivityInternal(
-                answerDetails.questionNumber,
-                eventName === 'input'
-                    ? event.inputType
-                    : `before-${event.inputType}`
-            );
-        } else if (!event.isTrusted) {
-            flagAndRecordClipboardActivityInternal(
-                answerDetails.questionNumber,
-                `untrusted-${eventName}`
-            );
-        }
+    const state = answerIntegrityStates.get(answerDetails.textarea);
+    const valueChanged = !state || state.value !== answerDetails.textarea.value;
+    if (!valueChanged) {
+        return;
+    }
 
-        if (eventName === 'input') {
-            const state = answerIntegrityStates.get(answerDetails.textarea);
-            if (state) {
-                state.value = answerDetails.textarea.value;
-            }
-        }
-    }, true);
-});
+    const clipboardInputTypes = [
+        'insertFromPaste',
+        'insertFromDrop',
+        'deleteByCut'
+    ];
+    if (clipboardInputTypes.includes(event.inputType)) {
+        flagAndRecordClipboardActivityInternal(
+            answerDetails.questionNumber,
+            event.inputType
+        );
+    } else if (!event.isTrusted) {
+        flagAndRecordClipboardActivityInternal(
+            answerDetails.questionNumber,
+            'untrusted-input'
+        );
+    }
+
+    if (state) {
+        state.value = answerDetails.textarea.value;
+    }
+}, true);
 
 document.querySelectorAll('.answer-box').forEach(function (answerBox, index) {
     const writtenAnswer = answerBox.querySelector('textarea');
